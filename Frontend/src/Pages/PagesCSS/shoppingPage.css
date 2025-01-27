@@ -1,0 +1,571 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding-top: calc(2rem * 2 + 1em + 2rem);
+}
+
+.rc-slider {
+  margin: 20px 0;
+}
+
+.filter-icon {
+  display: none;
+  font-size: 24px;
+  margin: 10px;
+}
+
+.page-filter-showing {
+  display: flex;
+  justify-content: flex-start; /* Align items to the left */
+  align-items: center;
+  padding: 10px;
+}
+
+.page-location {
+  display: flex;
+  align-items: center;
+  gap: 10px; /* Add space between the h2 and p elements */
+}
+
+.page-location h2,
+.page-location p {
+  margin: 0; /* Remove default margins */
+}
+
+.filter-showing {
+  margin-left: 20%;
+  display: flex;
+  align-items: center;
+  gap: 20px; /* Add space between the filter and showing info */
+}
+
+.filter-icon {
+  cursor: pointer;
+}
+
+.showing-info {
+  display: flex;
+  align-items: center;
+  gap: 10px; /* Add space between the filter text, icon, and the vertical line */
+}
+
+.showing-ico {
+  display: flex;
+  align-items: center;
+  gap: 10px; /* Add space between the icon and the text */
+}
+
+.showing-ico svg {
+  margin: 0; /* Reset margin for the icon */
+  padding: 0; /* Reset padding for the icon */
+}
+
+.showing-info p {
+  margin: 0; /* Reset margin for the paragraph */
+  padding: 0; /* Reset padding for the paragraph */
+}
+
+.vertical-line {
+  height: 24px; /* Adjust height as needed */
+  width: 1px;
+  background-color: #000; /* Adjust color as needed */
+  margin: 0 10px; /* Add space around the vertical line */
+}
+
+.page-wrap {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.page-wrap h2 {
+  display: flex;
+  align-items: flex-start;
+  padding: 0 20px;
+  font-size: 18px;
+  font-weight: light;
+}
+
+.search-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-left: 150px;
+}
+
+.search-input {
+  padding: 10px 20px;
+  font-size: 12px;
+  border: none;
+  border-radius: 4px;
+  outline: none;
+}
+
+.menu-toggle {
+  display: none;
+  font-size: 28px;
+  cursor: pointer;
+  color: white;
+}
+
+main {
+  display: flex;
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* Add a margin between the grid-section and the sidebar */
+
+.grid-section {
+  margin-left: 270px; /* Adjust the value to create space for the sidebar */
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px; /* Adds spacing between grid items */
+}
+
+/* Adjust grid-item height to a semi-medium size */
+.grid-item {
+  width: 250px; /* Adjust the width for uniformity */
+  height: 350px; /* Semi-medium size */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* Ensures content fits well */
+  border: 1px solid #ddd; /* Optional: adds a subtle border */
+  padding: 10px; /* Adds padding for spacing inside the box */
+  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1); /* Optional shadow */
+  border-radius: 5px; /* Optional rounded corners */
+}
+
+.product-image-container {
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end; /* Aligns the image to the right */
+}
+
+
+.product-image {
+  max-width: 100%;
+  max-height: 200px; /* Ensures image does not overflow */
+  object-fit: contain; /* Keeps image proportions */
+}
+
+.image-placeholder {
+  color: #999;
+  font-size: 1em;
+}
+
+.product-name {
+  font-size: 1rem;
+  margin: 10px 0;
+  line-height: 1.5;
+}
+
+.product-cost {
+  display: block; /* Ensure it is not set to 'none' */
+  color: inherit; /* Ensure the text color is visible */
+}
+
+.add-to-cart-button {
+   background-color: #333231;
+   cursor: pointer;
+   color: #fff;
+   border: none;
+   padding: 8px 12px;
+   text-align: center;
+   margin-top: 5px;
+   border-radius: 4px;
+}
+  .add-to-cart-button:hover {
+  background-color: #000;
+}
+/* Base styles */
+.page-wrap {
+  position: relative;
+  overflow: hidden;
+}
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(100, 100, 100, 0.2); 
+  z-index: 90;
+  backdrop-filter: blur(1px); 
+  pointer-events: none; /* Disable interactions with the overlay */
+}
+/* Cart Icon and Count */
+.cart-icon-container {
+  position: relative;
+  cursor: pointer;
+}
+
+.cart-icon {
+  position: relative;
+}
+
+.cart-count {
+  background-color: red;
+  color: white;
+  border-radius: 50%;
+  padding: 2px 6px;
+  font-size: 0.6em;
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  z-index: 10;
+}
+
+/* Dropdown for Cart Items */
+.cart-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background-color: white;
+  color: black;
+  z-index: 1050;
+  width: 300px;
+  border: 1px solid #ccc;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 10px;
+  filter: none !important;
+  pointer-events: auto;
+}
+
+/* Cart Item Styles */
+.cart-dropdown-item {
+  display: flex;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.cart-item-image {
+  width: 50px;
+  height: 50px;
+  margin-right: 30px;
+}
+
+.cart-item-details {
+  flex-grow: 1;
+  padding: 20px;
+}
+
+.delete-button {
+  color: red;
+  background: none;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.delete-button:hover {
+  color: darkred;
+  background: none;
+}
+
+/* Subtotal */
+.cart-subtotal {
+  padding: 10px 0;
+  font-size: 16px;
+  font-weight: bold;
+  border-top: 1px solid #ccc;
+  margin-top: 10px;
+}
+
+/* Checkout Button */
+.checkout-button {
+  background-color: #000;
+  color: white;
+  padding: 10px 15px;
+  width: 100%;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  border-radius: 5px;
+  margin-top: 10px;
+}
+
+/* Blurring the main content when cart dropdown is visible */
+.blur {
+  filter: blur(2px);
+  pointer-events: none; /* Prevents interaction with blurred content */
+}
+
+.mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  /* background-color: rgba(0, 0, 0, 0.3); Black with 50% opacity */
+  z-index: 99; /* Ensure it is below the cart dropdown */
+  pointer-events: auto; /* Prevent interaction with the mask */
+}
+
+/* Ensure the cart dropdown is not blurred */
+.cart-icon-container {
+  filter: none !important;
+  pointer-events: auto;
+}
+
+.grid-number {
+  cursor: pointer;
+  margin: 0 10px;
+  font-size: 24px;
+  color: #333;
+}
+
+.grid-pagination {
+  position: absolute;
+  display: flex;
+  align-items: flex-end;
+  bottom: 0;
+  right: 0;
+  background-color: white; /* Ensures it has a background and doesn't overlap with content */
+  z-index: 10; /* Brings it above the other content */
+  padding: 10px 20px; /* Adds padding for spacing */
+  box-shadow: 0px -2px 5px rgba(0, 0, 0, 0.1); /* Optional: Adds a shadow to make it stand out */
+}
+
+.grid-number {
+  cursor: pointer;
+  margin: 0 5px;
+  font-size: 24px;
+  color: #333;
+}
+
+.grid-number.active {
+  color: #b8860b;
+  font-weight: bold;
+  transform: scale(1.2);
+}
+
+.pagination-arrows {
+  cursor: pointer;
+  font-size: 24px;
+  margin: 0 10px;
+  color:black;
+}
+
+.benefits {
+  display: flex;
+  justify-content: space-evenly;
+  flex-direction: row; /* Keep the direction as row */
+  align-items: center;
+  margin: 20px;
+  background: #fff;
+  flex-wrap: wrap; /* Allow items to wrap on smaller screens */
+}
+
+.benefit {
+  display: flex;
+  flex-direction: row; /* Keep icon and text in a row */
+  align-items: center;
+  padding: 30px;
+  min-width: 250px; /* Minimum width for benefit cards */
+  max-width: 300px; /* Set a max width to prevent overflow */
+  box-sizing: border-box;
+}
+
+.benefit svg {
+  height: 100%; /* Make the icon match the height of the text */
+  width: auto;
+  font-size: 35px;
+  margin-right: 20px; /* Space between icon and text */
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  flex: 1;
+  min-width: 250px;
+  box-sizing: border-box;
+}
+
+.text h3 {
+  margin: 0;
+}
+
+.text p {
+  margin: 0;
+  margin-top: 5px;
+  line-height: 1.5;
+}
+
+/* Media Queries */
+@media screen and (max-width: 768px) {
+  .nav-list {
+    display: none;
+    flex-direction: column;
+    position: absolute;
+    top: 70px;
+    right: 0;
+    background-color: #333;
+    width: 100%;
+    padding: 20px 0;
+  }
+
+  .nav-list.active {
+    display: flex;
+  }
+
+  .nav-list li {
+    text-align: center;
+    margin: 10px 0;
+  }
+
+  .menu-toggle {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .grid-section {
+    grid-template-columns: 1fr;
+    width: 90%;
+    margin: 0 auto;
+  }
+
+  .filter-icon {
+    display: flex;
+    justify-content: flex-start;
+    color: #000;
+  }
+
+  .sidebar{
+    float: left;
+    margin-right: 20px; 
+    width: 250px; 
+    padding: 10px; 
+    background-color: #f9f9f9; 
+    border: 1px solid #ddd; 
+    border-radius: 5px; 
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); 
+  }
+  
+
+@media (max-width: 480px) {
+  .cart-dropdown {
+    width: 90%;
+    margin: 0 auto;
+    height: 60vh;
+    right: 0;
+    left: 0;
+    top: 60px;
+    position: fixed;
+  }
+
+  .cart-item-image {
+    width: 30px;
+    height: 30px;
+    margin-right: 10px;
+  }
+
+  .cart-item-details {
+    padding: 10px;
+  }
+
+  .cart-count {
+    font-size: 0.5em;
+    padding: 1px 4px;
+    top: -8px;
+    right: -8px;
+  }
+
+  .benefits {
+    display: flex;
+    flex-direction: row;
+  }
+
+  .benefit {
+    padding: 15px;
+    min-width: 150px;
+    max-width: 100%;
+  }
+
+  .benefit svg {
+    font-size: 28px;
+  }
+}
+
+/* header.css */
+
+header {
+  /* background: linear-gradient(to bottom, #e6e6e6, #f0f0f0); */
+  padding: 2rem;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+}
+
+.menu-toggle {
+  display: none;
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.nav-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+}
+
+.nav-list li {
+  margin: 0 1rem;
+}
+
+.nav-list li a {
+  color: #000;
+  text-decoration: none;
+  font-size: 1rem;
+  transition: color 0.3s ease;
+}
+
+.nav-list li a:hover {
+  color: #ddd;
+}
+
+.header-icon {
+  font-size: 1rem;
+}
+
+@media screen and (max-width: 768px) {
+  .menu-toggle {
+    display: block;
+  }
+
+  .nav-list {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background-color: #333;
+    padding: 1rem 0;
+  }
+
+  .nav-list.active {
+    display: flex;
+  }
+
+  .nav-list li {
+    margin: 0.5rem 0;
+  }
+}
+}
