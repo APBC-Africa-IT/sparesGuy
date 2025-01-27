@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Container, Row, Col, Form, Button, InputGroup } from 'react-bootstrap';
 import { 
   BsTelephone, 
@@ -15,9 +15,15 @@ import { AiOutlineSafety } from "react-icons/ai";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
+  const [bouncingIcon, setBouncingIcon] = useState(null);
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleIconClick = (iconName) => {
+    setBouncingIcon(iconName);
+    setTimeout(() => setBouncingIcon(null), 300); // Remove bounce effect after 300ms
   };
 
   return (
@@ -40,18 +46,70 @@ const Footer = () => {
               </a>
             </div>
             <div className="social-icons d-flex gap-3 mb-3">
-              {[BsFacebook, BsTwitter, BsInstagram, BsLinkedin].map((Icon, index) => (
-                <Icon 
-                  key={index}
+              <a 
+                href="https://www.facebook.com/APBCAfrica/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                onClick={() => handleIconClick('Facebook')}
+              >
+                <BsFacebook 
+                  className={bouncingIcon === 'Facebook' ? 'bounce' : ''}
                   style={{ 
                     cursor: 'pointer', 
                     fontSize: '1.5rem',
                     color: '#DAA520',
                     transition: 'transform 0.3s ease'
                   }}
-                  className="social-icon"
                 />
-              ))}
+              </a>
+              <a 
+                href="https://x.com/ApbcI33357" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                onClick={() => handleIconClick('Twitter')}
+              >
+                <BsTwitter 
+                  className={bouncingIcon === 'Twitter' ? 'bounce' : ''}
+                  style={{ 
+                    cursor: 'pointer', 
+                    fontSize: '1.5rem',
+                    color: '#DAA520',
+                    transition: 'transform 0.3s ease'
+                  }}
+                />
+              </a>
+              <a 
+                href="https://www.instagram.com/yourprofile" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                onClick={() => handleIconClick('Instagram')}
+              >
+                <BsInstagram 
+                  className={bouncingIcon === 'Instagram' ? 'bounce' : ''}
+                  style={{ 
+                    cursor: 'pointer', 
+                    fontSize: '1.5rem',
+                    color: '#DAA520',
+                    transition: 'transform 0.3s ease'
+                  }}
+                />
+              </a>
+              <a 
+                href="https://www.linkedin.com/in/apbc-africa-it-103814307/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                onClick={() => handleIconClick('LinkedIn')}
+              >
+                <BsLinkedin 
+                  className={bouncingIcon === 'LinkedIn' ? 'bounce' : ''}
+                  style={{ 
+                    cursor: 'pointer', 
+                    fontSize: '1.5rem',
+                    color: '#DAA520',
+                    transition: 'transform 0.3s ease'
+                  }}
+                />
+              </a>
             </div>
           </Col>
 
@@ -183,8 +241,20 @@ const Footer = () => {
             color: #DAA520 !important;
           }
           
-          .social-icon:hover {
-            transform: translateY(-3px);
+          .bounce {
+            animation: bounce 0.3s forwards;
+          }
+
+          @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+              transform: translateY(0);
+            }
+            40% {
+              transform: translateY(-10px);
+            }
+            60% {
+              transform: translateY(-5px);
+            }
           }
           
           .scroll-top-button:hover {
