@@ -88,7 +88,7 @@ const RegistrationPage = () => {
     <Container fluid className="vh-100 p-0 overflow-hidden">
       <Row className="h-100 g-0">
         {/* Left side - Image */}
-        <Col md={6} className="d-none d-md-block h-100 p-0">
+        <Col xs={12} md={6} className="d-none d-md-block h-100 p-0">
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
@@ -110,16 +110,16 @@ const RegistrationPage = () => {
         </Col>
 
         {/* Right side - Registration Form */}
-        <Col md={6} className="h-100 d-flex align-items-center justify-content-center" 
+        <Col xs={12} md={6} className="h-100 d-flex align-items-center justify-content-center" 
              style={{ backgroundColor: '#f8f9fa' }}>
           <motion.div
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5 }}
-            className="w-100 px-4"
+            className="w-100 px-3 px-md-4"
           >
             <Card className="border-0 shadow-lg mx-auto" 
-                  style={{ maxWidth: '500px', backgroundColor: '#ffffff' }}>
+                  style={{ maxWidth: '500px', width: '100%', backgroundColor: '#ffffff' }}>
               <Card.Body className="p-4">
                 <h2 className="text-center mb-4" style={{ color: '#000000', fontWeight: 'bold' }}>
                   Create an Account
@@ -208,6 +208,12 @@ const RegistrationPage = () => {
                       padding: '12px',
                       fontSize: '16px',
                       transition: 'transform 0.2s ease', // Smooth transition for scaling
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'scale(0.95)'; // Scale down on hover
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'scale(1)'; // Scale back to original size
                     }}
                   >
                     {isLoading ? 'Creating Account...' : 'Create Account'}
