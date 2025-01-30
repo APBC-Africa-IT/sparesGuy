@@ -1,12 +1,15 @@
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Container, Row, Col, Form, Button, Card, Toast } from 'react-bootstrap';
 import { FaUser, FaEnvelope, FaLock, FaGoogle, FaCheckCircle, FaExclamationCircle } from 'react-icons/fa';
 import LoginFrame from '../Homepage/HomepageImages/gears.jpg';
 import { useRegisterUserMutation } from '../slices/usersApiSlice';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import {signInWithGoogle, auth} from "../firebase"
+import { onAuthStateChanged } from 'firebase/auth';
 
 const RegistrationPage = () => {
+  const [, setUser] = useState(null)
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -47,7 +50,7 @@ const RegistrationPage = () => {
     }
 
     try {
-      const res = await registerUser({ name, email, password }).unwrap();
+      await registerUser({ name, email, password }).unwrap();
       showNotification('Registration successful! Redirecting to login...', 'success');
       setTimeout(() => {
         navigate('/login');
@@ -56,6 +59,30 @@ const RegistrationPage = () => {
       showNotification(err?.data?.message || 'Registration failed. Please try again.', 'error');
     }
   };
+
+  useEffect(()=>{
+    const unsubscribe = onAuthStateChanged(auth, (user)=>{
+      if(user){
+         setUser(user)
+      }else{
+        setUser(null)
+      }
+      return () => unsubscribe();
+    }, [])
+  })
+
+  const ggsignIn =async()=>{
+    try {
+    const res =  await signInWithGoogle()
+     //Handle sending res data to my mongo db database
+
+      console.log("You were logged In",res)
+      navigate("/shop")
+      
+    } catch (error) {
+      console.log(error.message)
+    }
+  }
 
   return (
     <Container fluid className="vh-100 p-0 overflow-hidden">
@@ -186,6 +213,7 @@ const RegistrationPage = () => {
                   </Button>
 
                   <Button
+                  onClick={ggsignIn}
                     variant="light"
                     className="w-100 d-flex align-items-center justify-content-center"
                     style={{ 
@@ -196,6 +224,7 @@ const RegistrationPage = () => {
                       fontSize: '16px'
                     }}
                   >
+                     
                     <FaGoogle className="me-2" style={{ color: '#DAA520' }}/>
                     Sign up with Google
                   </Button>

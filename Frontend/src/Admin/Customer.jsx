@@ -168,6 +168,7 @@ const Customers = () => {
                     </StyledTable>
 
                     {/* Pagination */}
+                    
                     <div className="d-flex justify-content-center">
                         <Pagination>
                             <Pagination.First onClick={() => paginate(1)} />
