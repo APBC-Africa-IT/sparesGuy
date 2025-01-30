@@ -43,9 +43,9 @@ const Settings = () => {
         <Tab eventKey="general" title="General" tabClassName="custom-tab">
           <Card>
             <Card.Body>
-            <h5 style={{ backgroundColor: "#DAA520", color: "white", padding: "10px", borderRadius: "5px" }}>
-      General Settings
-    </h5>
+              <h5 style={{ backgroundColor: "#DAA520", color: "white", padding: "10px", borderRadius: "5px" }}>
+                General Settings
+              </h5>
               <Form>
                 <Form.Group controlId="siteName" className="mb-3">
                   <Form.Label>Site Name</Form.Label>
@@ -103,12 +103,13 @@ const Settings = () => {
         </Tab>
 
         {/* User Management */}
+        
         <Tab eventKey="users" title="User Management">
           <Card>
             <Card.Body>
-            <h5 style={{ backgroundColor: "#DAA520", color: "white", padding: "10px", borderRadius: "5px" }}>
-      User Management
-    </h5>
+              <h5 style={{ backgroundColor: "#DAA520", color: "white", padding: "10px", borderRadius: "5px" }}>
+                User Management
+              </h5>
               <Form>
                 <Form.Check
                   type="switch"
@@ -144,9 +145,9 @@ const Settings = () => {
         <Tab eventKey="inventory" title="Inventory">
           <Card>
             <Card.Body>
-            <h5 style={{ backgroundColor: "#DAA520", color: "white", padding: "10px", borderRadius: "5px" }}>
-      Inventory Settings
-    </h5>
+              <h5 style={{ backgroundColor: "#DAA520", color: "white", padding: "10px", borderRadius: "5px" }}>
+                Inventory Settings
+              </h5>
               <Form>
                 <Form.Group controlId="lowStockThreshold" className="mb-3">
                   <Form.Label>Low Stock Threshold</Form.Label>
@@ -184,9 +185,9 @@ const Settings = () => {
         <Tab eventKey="payment" title="Payment & Orders">
           <Card>
             <Card.Body>
-            <h5 style={{ backgroundColor: "#DAA520", color: "white", padding: "10px", borderRadius: "5px" }}>
-      Payment & Order settings
-    </h5>
+              <h5 style={{ backgroundColor: "#DAA520", color: "white", padding: "10px", borderRadius: "5px" }}>
+                Payment & Order settings
+              </h5>
               <Form>
                 <Form.Group controlId="paymentMethods" className="mb-3">
                   <Form.Label>Supported Payment Methods</Form.Label>
@@ -236,9 +237,9 @@ const Settings = () => {
         <Tab eventKey="notifications" title="Notifications">
           <Card>
             <Card.Body>
-            <h5 style={{ backgroundColor: "#DAA520", color: "white", padding: "10px", borderRadius: "5px" }}>
-      Notifiation Settings
-    </h5>
+              <h5 style={{ backgroundColor: "#DAA520", color: "white", padding: "10px", borderRadius: "5px" }}>
+                Notifiation Settings
+              </h5>
               <Form>
                 <Form.Check
                   type="switch"
