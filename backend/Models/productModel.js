@@ -12,24 +12,19 @@ const productSchema = new mongoose.Schema({
   make: { type: String, required: true }, // e.g., Toyota, Honda
   model: { type: String, required: true }, // e.g., Corolla, Civic
   year: { type: Number, required: true },
-  // transmission: { type: String, enum: ['Manual', 'Automatic'], required: true },
   condition: { type: String, enum: ['New', 'Used'], required: true },
-  // fuelType: { type: String, enum: ['Diesel', 'Petrol'], required: true },
   category: {
     type: String,
     enum: ['Body Part', 'Engine Part', 'Electrical Components', 'Suspension Parts', 'Transmission Parts'],
     required: true
   },
 
-  // Additional fields for product classification and discount
-  // isLatest: { type: Boolean, default: false },
-  isBestSeller: { type: Boolean, default: false },
-  isFeatured: { type: Boolean, default: false },
+  // Discount-related fields
   hasDiscount: { type: Boolean, default: false },
   discountPercentage: {
     type: Number,
     min: 0,
-    max: 50,
+    max: 100,
     validate: {
       validator: function (v) {
         // Ensure discountPercentage is only set if hasDiscount is true
@@ -39,10 +34,20 @@ const productSchema = new mongoose.Schema({
     },
     default: 0 // No discount by default
   },
-  discountCode: { type: String, default: uuidv4 }, // Auto-generated discount code
+  discountCode: { type: String, default: uuidv4, unique: true }, // Auto-generated discount code
   discountStartDate: { type: Date },
   discountEndDate: { type: Date }
 });
+
+// Method to check if the discount is valid
+productSchema.methods.isDiscountValid = function () {
+  const now = new Date();
+  return (
+    this.hasDiscount &&
+    this.discountStartDate <= now &&
+    this.discountEndDate >= now
+  );
+};
 
 const Product = mongoose.model("Product", productSchema);
 
