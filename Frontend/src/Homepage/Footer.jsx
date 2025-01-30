@@ -10,9 +10,6 @@ import {
   BsArrowUp 
 } from "react-icons/bs";
 import { FiMail, FiMapPin } from "react-icons/fi";
-import { BiAccessibility } from "react-icons/bi";
-import { MdOutlinePrivacyTip } from "react-icons/md";
-import { AiOutlineSafety } from "react-icons/ai";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -41,136 +38,60 @@ const Footer = () => {
                 target="_blank" 
                 rel="noopener noreferrer"
                 style={{ color: '#FFFFFF', textDecoration: 'none' }}
-                className="hover-gold"
               >   11122-Ngara, Nairobi
               </a>
             </div>
             <div className="social-icons d-flex gap-3 mb-3">
-              <a 
-                href="https://www.facebook.com/APBCAfrica/" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                onClick={() => handleIconClick('Facebook')}
-              >
-                <BsFacebook 
-                  className={bouncingIcon === 'Facebook' ? 'bounce' : ''}
-                  style={{ 
-                    cursor: 'pointer', 
-                    fontSize: '1.5rem',
-                    color: '#DAA520',
-                    transition: 'transform 0.3s ease'
-                  }}
-                />
-              </a>
-              <a 
-                href="https://x.com/ApbcI33357" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                onClick={() => handleIconClick('Twitter')}
-              >
-                <BsTwitter 
-                  className={bouncingIcon === 'Twitter' ? 'bounce' : ''}
-                  style={{ 
-                    cursor: 'pointer', 
-                    fontSize: '1.5rem',
-                    color: '#DAA520',
-                    transition: 'transform 0.3s ease'
-                  }}
-                />
-              </a>
-              <a 
-                href="https://www.instagram.com/yourprofile" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                onClick={() => handleIconClick('Instagram')}
-              >
-                <BsInstagram 
-                  className={bouncingIcon === 'Instagram' ? 'bounce' : ''}
-                  style={{ 
-                    cursor: 'pointer', 
-                    fontSize: '1.5rem',
-                    color: '#DAA520',
-                    transition: 'transform 0.3s ease'
-                  }}
-                />
-              </a>
-              <a 
-                href="https://www.linkedin.com/in/apbc-africa-it-103814307/" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                onClick={() => handleIconClick('LinkedIn')}
-              >
-                <BsLinkedin 
-                  className={bouncingIcon === 'LinkedIn' ? 'bounce' : ''}
-                  style={{ 
-                    cursor: 'pointer', 
-                    fontSize: '1.5rem',
-                    color: '#DAA520',
-                    transition: 'transform 0.3s ease'
-                  }}
-                />
-              </a>
+              {['Facebook', 'Twitter', 'Instagram', 'LinkedIn'].map((platform, index) => {
+                const icons = {
+                  Facebook: <BsFacebook />,
+                  Twitter: <BsTwitter />,
+                  Instagram: <BsInstagram />,
+                  LinkedIn: <BsLinkedin />
+                };
+                return (
+                  <a 
+                    key={index}
+                    href={`https://www.${platform.toLowerCase()}.com`} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    onClick={() => handleIconClick(platform)}
+                    style={{ 
+                      cursor: 'pointer', 
+                      fontSize: '1.5rem',
+                      color: '#DAA520',
+                      transition: 'transform 0.3s ease'
+                    }}
+                    className="social-icon"
+                  >
+                    {icons[platform]}
+                  </a>
+                );
+              })}
             </div>
           </Col>
 
           {/* Quick Links */}
-<Col lg={3} md={6}>
-  <h3 style={{ color: '#DAA520', marginBottom: '1.2rem' }}>Quick Links</h3>
-  <Row>
-    <Col xs={6} className="mb-2">
-      <Link 
-        to="/Homepage"  // Link to Homepage.jsx
-        style={{ 
-          color: '#FFFFFF', 
-          textDecoration: 'none',
-          transition: 'color 0.3s ease'
-        }}
-        className="hover-gold"
-      >
-        Home
-      </Link>
-    </Col>
-    <Col xs={6} className="mb-2">
-      <Link 
-        to="/Product"  // Link to Product.jsx
-        style={{ 
-          color: '#FFFFFF', 
-          textDecoration: 'none',
-          transition: 'color 0.3s ease'
-        }}
-        className="hover-gold"
-      >
-        Products
-      </Link>
-    </Col>
-    <Col xs={6} className="mb-2">
-      <Link 
-        to="/AboutUs"  // Link to AboutUs.jsx
-        style={{ 
-          color: '#FFFFFF', 
-          textDecoration: 'none',
-          transition: 'color 0.3s ease'
-        }}
-        className="hover-gold"
-      >
-        About
-      </Link>
-    </Col>
-    <Col xs={6} className="mb-2">
-      <Link 
-        to="/ContactUs"  // Link to ContactUs.jsx
-        style={{ 
-          color: '#FFFFFF', 
-          textDecoration: 'none',
-          transition: 'color 0.3s ease'
-        }}
-        className="hover-gold"
-      >
-        Contact Us
-      </Link>
-    </Col>
-  </Row>
-</Col>
+          <Col lg={3} md={6}>
+            <h3 style={{ color: '#DAA520', marginBottom: '1.2rem' }}>Quick Links</h3>
+            <Row>
+              {['Home', 'Shop', 'About', 'Contact Us'].map((link, index) => (
+                <Col xs={6} className="mb-2" key={index}>
+                  <Link 
+                    to={`/${link.replace(/\s+/g, '')}`}  // Convert to camelCase
+                    style={{ 
+                      color: '#FFFFFF', 
+                      textDecoration: 'none',
+                      transition: 'color 0.3s ease'
+                    }}
+                    className="hover-gold"
+                  >
+                    {link}
+                  </Link>
+                </Col>
+              ))}
+            </Row>
+          </Col>
 
           {/* Contact Info */}
           <Col lg={3} md={6}>
@@ -230,72 +151,68 @@ const Footer = () => {
         <hr style={{ borderColor: '#DAA520', margin: '2rem 0' }} />
 
         {/* Footer Bottom */}
-        
+       
+
+        {/* Scroll to Top Button */}
+        <Button
+          onClick={scrollToTop}
+          style={{
+            position: 'fixed',
+            bottom: '20px',
+            right: '20px',
+            backgroundColor: '#DAA520',
+            border: 'none',
+            borderRadius: '50%',
+            width: '40px',
+            height: '40px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            opacity: '0.8',
+            transition: 'opacity 0.3s ease'
+          }}
+        >
+          <BsArrowUp />
+        </Button>
+
+        <style>
+          {`
+            .hover-gold:hover {
+              color: #DAA520 !important;
+            }
+            
+            .social-icon:hover {
+              transform: scale(1.1); /* Grows the icon slightly on hover */
+            }
+
+            .bounce {
+              animation: bounce 0.3s forwards;
+            }
+
+            @keyframes bounce {
+              0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+              }
+              40% {
+                transform: translateY(-10px);
+              }
+              60% {
+                transform: translateY(-5px);
+              }
+            }
+            
+            .scroll-top-button:hover {
+              opacity: 1 !important;
+            }
+            
+            @media (max-width: 768px) {
+              .social-icons {
+                justify-content: center;
+              }
+            }
+          `}
+        </style>
       </Container>
-      <Row className="py-3 align-items-center">
-          <Col md={12} className="text-center">
-            <small>&copy; {currentYear} My Spares Guy. All rights reserved.</small>
-            <div className="d-flex justify-content-center gap-4 mt-2">
-              
-            </div>
-          </Col>
-        </Row>
-      {/* Scroll to Top Button */}
-      <Button
-        onClick={scrollToTop}
-        style={{
-          position: 'fixed',
-          bottom: '20px',
-          right: '20px',
-          backgroundColor: '#DAA520',
-          border: 'none',
-          borderRadius: '50%',
-          width: '40px',
-          height: '40px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          opacity: '0.8',
-          transition: 'opacity 0.3s ease'
-        }}
-        className="scroll-top-button"
-      >
-        <BsArrowUp />
-      </Button>
-
-      <style>
-        {`
-          .hover-gold:hover {
-            color: #DAA520 !important;
-          }
-          
-          .bounce {
-            animation: bounce 0.3s forwards;
-          }
-
-          @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% {
-              transform: translateY(0);
-            }
-            40% {
-              transform: translateY(-10px);
-            }
-            60% {
-              transform: translateY(-5px);
-            }
-          }
-          
-          .scroll-top-button:hover {
-            opacity: 1 !important;
-          }
-          
-          @media (max-width: 768px) {
-            .social-icons {
-              justify-content: center;
-            }
-          }
-        `}
-      </style>
     </Container>
   );
 };

@@ -179,7 +179,8 @@ const RegistrationPage = () => {
                       backgroundColor: '#000000',
                       borderColor: '#000000',
                       padding: '12px',
-                      fontSize: '16px'
+                      fontSize: '16px',
+                      transition: 'transform 0.2s ease', // Smooth transition for scaling
                     }}
                   >
                     {isLoading ? 'Creating Account...' : 'Create Account'}
@@ -193,7 +194,14 @@ const RegistrationPage = () => {
                       borderColor: '#DAA520',
                       color: '#000000',
                       padding: '12px',
-                      fontSize: '16px'
+                      fontSize: '16px',
+                      transition: 'transform 0.2s ease', // Smooth transition for scaling
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'scale(0.95)'; // Scale down on hover
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'scale(1)'; // Scale back to original size
                     }}
                   >
                     <FaGoogle className="me-2" style={{ color: '#DAA520' }}/>
