@@ -133,39 +133,41 @@ const Inventory = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {Array.isArray(parts) && parts.map(part => (
-                                <tr key={part._id}>
-                                    <td>{part._id}</td>
-                                    <td>
-                                        {part.image ? (
-                                            <ImagePreview src={part.image} alt={part.name} />
-                                        ) : (
-                                            <FaImage size={30} color="#DAA520" />
-                                        )}
-                                    </td>
-                                    <td>{part.name}</td>
-                                    <td>{part.quantity}</td>
-                                    <td>${part.price.toFixed(2)}</td>
-                                    <td>{part.category || 'N/A'}</td>
-                                    <td>
-                                        <ActionButton
-                                            variant="warning"
-                                            onClick={() => handleShow(part._id)}
-                                            style={{ backgroundColor: '#DAA520', borderColor: '#DAA520' }}
-                                        >
-                                            <FaEdit /> Edit
-                                        </ActionButton>
-
-                                        <ActionButton
-                                            variant="danger"
-                                            onClick={() => handleDelete(part._id)}
-                                        >
-                                            <FaTrash /> Delete
-                                        </ActionButton>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
+  {Array.isArray(parts) &&
+    parts.map((part) => (
+      <tr key={part._id}>
+        <td>{part._id}</td>
+        <td>
+          {part.image ? (
+            <ImagePreview src={part.image} alt={part.name} />
+          ) : (
+            <FaImage size={30} color="#DAA520" />
+          )}
+        </td>
+        <td>{part.name}</td>
+        <td>{part.quantity}</td>
+        <td>${part.price.toFixed(2)}</td>
+        <td>{part.category || 'N/A'}</td>
+        <td>
+          <p className={part.inStock ? 'text-success' : 'text-danger'}>
+            {part.inStock ? 'In Stock' : 'Out of Stock'}
+          </p>
+        </td>
+        <td>
+          <ActionButton
+            variant="warning"
+            onClick={() => handleShow(part._id)}
+            style={{ backgroundColor: '#DAA520', borderColor: '#DAA520' }}
+          >
+            <FaEdit /> Edit
+          </ActionButton>
+          <ActionButton variant="danger" onClick={() => handleDelete(part._id)}>
+            <FaTrash /> Delete
+          </ActionButton>
+        </td>
+      </tr>
+    ))}
+</tbody>
                     </StyledTable>
                 </Card.Body>
             </StyledCard>

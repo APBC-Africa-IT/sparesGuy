@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Button, Modal, Container, Row, Col } from 'react-bootstrap';
 import { FaSignOutAlt, FaExclamationTriangle } from 'react-icons/fa';
-import { useNavigate } from 'react-router-dom';  // Updated import
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 // Styled Components
@@ -13,6 +13,8 @@ const LogoutButton = styled(Button)`
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 10px 20px;
+  border-radius: 5px;
   &:hover {
     background-color: #c7911f;
   }
@@ -28,24 +30,31 @@ const PageTitle = styled.h2`
 const ConfirmationText = styled.p`
   font-size: 1.1rem;
   color: #000000;
-  margin-bottom: 20px;
+  text-align: center;
 `;
 
 const Icon = styled(FaExclamationTriangle)`
   color: #DAA520;
   font-size: 3rem;
-  margin-bottom: 20px;
+  display: block;
+  margin: 0 auto 20px;
 `;
 
 const Logout = () => {
-  const [showModal, setShowModal] = useState(false); // Modal visibility state
-  const navigate = useNavigate();  // Using the useNavigate hook for navigation
+  const [showModal, setShowModal] = useState(false); 
+  const navigate = useNavigate();
 
   // Handle the logout action
   const handleLogout = () => {
-    // You can add your logout logic here (e.g., clearing session storage, tokens)
-    localStorage.removeItem('authToken'); // Example: Remove auth token from localStorage
-    navigate('/login');  // Redirect to the login page after logging out
+    // Remove authentication details
+    localStorage.removeItem('authToken'); // Remove stored token
+    localStorage.removeItem('user'); // Remove user details if stored
+
+    // Optional: Clear sessionStorage if used
+    sessionStorage.clear();
+
+    // Redirect to login page
+    navigate('/login');
   };
 
   // Toggle modal visibility
@@ -54,41 +63,37 @@ const Logout = () => {
   };
 
   return (
-    <Container fluid>
-      <Row className="justify-content-center">
-        <Col md={6}>
-          <PageTitle>Admin Logout</PageTitle>
+    <Container className="d-flex justify-content-center align-items-center flex-column">
+      <PageTitle>Admin Logout</PageTitle>
 
-          {/* Logout Button */}
-          <LogoutButton onClick={toggleModal}>
-            <FaSignOutAlt style={{ marginRight: '8px' }} />
-            Logout
-          </LogoutButton>
+      {/* Logout Button */}
+      <LogoutButton onClick={toggleModal}>
+        <FaSignOutAlt style={{ marginRight: '8px' }} />
+        Logout
+      </LogoutButton>
 
-          {/* Logout Confirmation Modal */}
-          <Modal show={showModal} onHide={toggleModal} centered>
-            <Modal.Header closeButton>
-              <Modal.Title>
-                <Icon />
-                Are you sure you want to log out?
-              </Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-              <ConfirmationText>
-                You will be logged out of your admin session. Any unsaved data may be lost.
-              </ConfirmationText>
-            </Modal.Body>
-            <Modal.Footer>
-              <Button variant="secondary" onClick={toggleModal}>
-                Cancel
-              </Button>
-              <Button variant="danger" onClick={handleLogout}>
-                Yes, Logout
-              </Button>
-            </Modal.Footer>
-          </Modal>
-        </Col>
-      </Row>
+      {/* Logout Confirmation Modal */}
+      <Modal show={showModal} onHide={toggleModal} centered>
+        <Modal.Header closeButton>
+          <Modal.Title className="w-100 text-center">
+            <Icon />
+            Are you sure you want to log out?
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <ConfirmationText>
+            You will be logged out of your admin session. Any unsaved data may be lost.
+          </ConfirmationText>
+        </Modal.Body>
+        <Modal.Footer className="d-flex justify-content-center">
+          <Button variant="secondary" onClick={toggleModal}>
+            Cancel
+          </Button>
+          <Button variant="danger" onClick={handleLogout}>
+            Yes, Logout
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </Container>
   );
 };
