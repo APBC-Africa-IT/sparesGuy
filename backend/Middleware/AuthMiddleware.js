@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import User from '../Models/User.js';
+import mongoose from 'mongoose';
 
 dotenv.config();
 
@@ -14,12 +15,6 @@ const authMiddleware = async (req, res, next) => {
     if (!token) {
         return res.status(401).json({ message: 'Authentication error: Token not provided' });  
     }
-    const validateObjectId = (req, res, next) => {
-        if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-          return res.status(400).json({ error: "Invalid product ID" });
-        }
-        next();
-      };
 
     try {
         const decoded = jwt.verify(token, key);
@@ -35,5 +30,12 @@ const authMiddleware = async (req, res, next) => {
     }
 };
 
-export default authMiddleware;
+// Middleware to check if the user is an admin
+export const requireAdmin = (req, res, next) => {
+    if (req.user && req.user.role === 'admin') {
+        return next();
+    }
+    return res.status(403).json({ message: 'Access denied: Admins only' });
+};
 
+export default authMiddleware;
