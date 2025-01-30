@@ -124,6 +124,7 @@ const CategoriesPage = () => {
           </CategoryTable>
 
           {/* Edit/Add Modal */}
+          
           <Modal show={showModal} onHide={handleCloseModal}>
             <Modal.Header closeButton>
               <Modal.Title>{currentCategory ? 'Edit Category' : 'Add New Category'}</Modal.Title>
