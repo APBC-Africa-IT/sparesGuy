@@ -1,125 +1,39 @@
-// src/components/Notifications.jsx
-import React, { useState, useEffect } from 'react';
-import { Container, Card, Table, Button, Modal, Form, Row, Col, Pagination, Alert } from 'react-bootstrap';
-import { FaPlus, FaEdit, FaTrash, FaBell } from 'react-icons/fa';
+import React, { useState } from 'react';
+import { Container, Card, Table, Button, Modal, Row, Col, Pagination, Alert } from 'react-bootstrap';
+import { FaBell } from 'react-icons/fa';
 import styled from 'styled-components';
 
 const Notifications = () => {
     // State Management
-    const [notifications, setNotifications] = useState([]);
+    const [notifications, setNotifications] = useState([
+        { id: 1, title: "System Update", message: "A new update has been applied to the system.", audience: "all", date: "2024-01-30 10:00 AM" },
+        { id: 2, title: "Scheduled Maintenance", message: "The system will undergo maintenance tonight.", audience: "admins", date: "2024-01-28 8:00 PM" }
+    ]);
     const [showModal, setShowModal] = useState(false);
     const [currentNotification, setCurrentNotification] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage] = useState(5);
-    const [alert, setAlert] = useState({ show: false, message: '', type: '' });
-
-    // Form State
-    const [formData, setFormData] = useState({
-        title: '',
-        message: '',
-        audience: 'all', // Target audience: 'all', 'admins', 'customers'
-    });
 
     // Handle Modal
-    const handleClose = () => {
-        setShowModal(false);
-        setCurrentNotification(null);
-        resetForm();
-    };
-
-    const handleShow = (notification = null) => {
-        if (notification) {
-            setCurrentNotification(notification);
-            setFormData(notification);
-        }
+    const handleShow = (notification) => {
+        setCurrentNotification(notification);
         setShowModal(true);
     };
-
-    // Form Handlers
-    const resetForm = () => {
-        setFormData({
-            title: '',
-            message: '',
-            audience: 'all',
-        });
-    };
-
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setFormData((prev) => ({
-            ...prev,
-            [name]: value,
-        }));
-    };
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        try {
-            const newNotification = {
-                id: currentNotification ? currentNotification.id : Date.now(),
-                ...formData,
-                date: new Date().toLocaleString(),
-            };
-
-            if (currentNotification) {
-                setNotifications(notifications.map((n) => (n.id === currentNotification.id ? newNotification : n)));
-                showAlert('Notification updated successfully!', 'success');
-            } else {
-                setNotifications([...notifications, newNotification]);
-                showAlert('Notification added successfully!', 'success');
-            }
-            handleClose();
-        } catch (error) {
-            showAlert('Error processing notification data!', 'danger');
-        }
-    };
-
-    // Alert Handler
-    const showAlert = (message, type) => {
-        setAlert({ show: true, message, type });
-        setTimeout(() => setAlert({ show: false, message: '', type: '' }), 3000);
-    };
-
-    // Delete Handler
-    const handleDelete = async (id) => {
-        if (window.confirm('Are you sure you want to delete this notification?')) {
-            try {
-                setNotifications(notifications.filter((notification) => notification.id !== id));
-                showAlert('Notification deleted successfully!', 'success');
-            } catch (error) {
-                showAlert('Error deleting notification!', 'danger');
-            }
-        }
-    };
+    const handleClose = () => setShowModal(false);
 
     // Pagination
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
     const currentItems = notifications.slice(indexOfFirstItem, indexOfLastItem);
-
     const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
     return (
         <StyledContainer fluid>
-            {alert.show && (
-                <Alert variant={alert.type} onClose={() => setAlert({ show: false })} dismissible>
-                    {alert.message}
-                </Alert>
-            )}
-
             <StyledCard>
                 <Card.Body>
                     <Row className="align-items-center mb-4">
                         <Col>
-                            <StyledHeader>Notification Management</StyledHeader>
-                        </Col>
-                        <Col xs="auto">
-                            <ActionButton
-                                className="primary-button"
-                                onClick={() => handleShow()}
-                            >
-                                <FaPlus /> Add Notification
-                            </ActionButton>
+                            <StyledHeader>Notifications</StyledHeader>
                         </Col>
                     </Row>
 
@@ -143,17 +57,10 @@ const Notifications = () => {
                                     <td>{notification.date}</td>
                                     <td>
                                         <ActionButton
-                                            variant="warning"
+                                            variant="info"
                                             onClick={() => handleShow(notification)}
-                                            style={{ backgroundColor: '#DAA520', borderColor: '#DAA520' }}
                                         >
-                                            <FaEdit /> Edit
-                                        </ActionButton>
-                                        <ActionButton
-                                            variant="danger"
-                                            onClick={() => handleDelete(notification.id)}
-                                        >
-                                            <FaTrash /> Delete
+                                            <FaBell /> View
                                         </ActionButton>
                                     </td>
                                 </tr>
@@ -165,9 +72,7 @@ const Notifications = () => {
                     <div className="d-flex justify-content-center">
                         <Pagination>
                             <Pagination.First onClick={() => paginate(1)} />
-                            <Pagination.Prev
-                                onClick={() => paginate(Math.max(1, currentPage - 1))}
-                            />
+                            <Pagination.Prev onClick={() => paginate(Math.max(1, currentPage - 1))} />
                             {[...Array(Math.ceil(notifications.length / itemsPerPage))].map((_, index) => (
                                 <Pagination.Item
                                     key={index + 1}
@@ -177,73 +82,31 @@ const Notifications = () => {
                                     {index + 1}
                                 </Pagination.Item>
                             ))}
-                            <Pagination.Next
-                                onClick={() => paginate(Math.min(
-                                    Math.ceil(notifications.length / itemsPerPage),
-                                    currentPage + 1
-                                ))} />
-                            <Pagination.Last
-                                onClick={() => paginate(Math.ceil(notifications.length / itemsPerPage))} />
+                            <Pagination.Next onClick={() => paginate(Math.min(Math.ceil(notifications.length / itemsPerPage), currentPage + 1))} />
+                            <Pagination.Last onClick={() => paginate(Math.ceil(notifications.length / itemsPerPage))} />
                         </Pagination>
                     </div>
                 </Card.Body>
             </StyledCard>
 
-            {/* Add/Edit Notification Modal */}
+            {/* Notification Details Modal */}
             <StyledModal show={showModal} onHide={handleClose} size="lg">
                 <Modal.Header closeButton>
-                    <Modal.Title>
-                        {currentNotification ? 'Edit Notification' : 'Add New Notification'}
-                    </Modal.Title>
+                    <Modal.Title>Notification Details</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <Form onSubmit={handleSubmit}>
-                        <Form.Group className="mb-3">
-                            <Form.Label>Title</Form.Label>
-                            <Form.Control
-                                type="text"
-                                name="title"
-                                value={formData.title}
-                                onChange={handleInputChange}
-                                required
-                            />
-                        </Form.Group>
-                        <Form.Group className="mb-3">
-                            <Form.Label>Message</Form.Label>
-                            <Form.Control
-                                as="textarea"
-                                rows={3}
-                                name="message"
-                                value={formData.message}
-                                onChange={handleInputChange}
-                                required
-                            />
-                        </Form.Group>
-                        <Form.Group className="mb-3">
-                            <Form.Label>Audience</Form.Label>
-                            <Form.Select
-                                name="audience"
-                                value={formData.audience}
-                                onChange={handleInputChange}
-                            >
-                                <option value="all">All Users</option>
-                                <option value="admins">Admins</option>
-                                <option value="customers">Customers</option>
-                            </Form.Select>
-                        </Form.Group>
-                        <div className="d-flex justify-content-end gap-2">
-                            <Button variant="secondary" onClick={handleClose}>
-                                Cancel
-                            </Button>
-                            <Button
-                                type="submit"
-                                style={{ backgroundColor: '#DAA520', borderColor: '#DAA520' }}
-                            >
-                                {currentNotification ? 'Update' : 'Add'} Notification
-                            </Button>
-                        </div>
-                    </Form>
+                    {currentNotification && (
+                        <>
+                            <p><strong>Title:</strong> {currentNotification.title}</p>
+                            <p><strong>Message:</strong> {currentNotification.message}</p>
+                            <p><strong>Audience:</strong> {currentNotification.audience}</p>
+                            <p><strong>Date:</strong> {currentNotification.date}</p>
+                        </>
+                    )}
                 </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={handleClose}>Close</Button>
+                </Modal.Footer>
             </StyledModal>
         </StyledContainer>
     );
