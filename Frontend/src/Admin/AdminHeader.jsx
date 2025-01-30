@@ -49,10 +49,7 @@ const AdminHeader = () => {
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
           >
-            <FaBell />
-            {notifications > 0 && (
-              <NotificationBadge>{notifications}</NotificationBadge>
-            )}
+            
           </IconButton>
 
           <IconButton
@@ -60,10 +57,7 @@ const AdminHeader = () => {
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
           >
-            <FaEnvelope />
-            {messages > 0 && (
-              <NotificationBadge>{messages}</NotificationBadge>
-            )}
+            
           </IconButton>
 
           <UserProfile isDark={isDark}>
