@@ -19,6 +19,10 @@ const productSchema = new mongoose.Schema({
     required: true
   },
 
+  // Stock-related fields
+  quantity: { type: Number, required: true, default: 0 }, // Quantity in stock
+  inStock: { type: Boolean, default: true }, // Stock status
+
   // Discount-related fields
   hasDiscount: { type: Boolean, default: false },
   discountPercentage: {
@@ -47,6 +51,24 @@ productSchema.methods.isDiscountValid = function () {
     this.discountStartDate <= now &&
     this.discountEndDate >= now
   );
+};
+
+// Method to handle product purchase
+productSchema.methods.purchase = function (quantityPurchased) {
+  if (this.quantity < quantityPurchased) {
+    throw new Error('Out of stock');
+  }
+
+  // Deduct the quantity
+  this.quantity -= quantityPurchased;
+
+  // Update inStock status
+  if (this.quantity <= 0) {
+    this.quantity = 0;
+    this.inStock = false;
+  }
+
+  return this.save();
 };
 
 const Product = mongoose.model("Product", productSchema);

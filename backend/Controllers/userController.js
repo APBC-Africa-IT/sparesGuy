@@ -1,20 +1,37 @@
 import User from "../Models/User.js";
 import bcrypt from 'bcrypt';
 import dotenv from "dotenv";
-import jwt from 'jsonwebtoken'
-import generateToken from "../Utils/generateToken.js";
+import jwt from 'jsonwebtoken';
 
+dotenv.config();
 
-dotenv.config()
+// Function to generate JWT and set it in the response's cookies
+const generateToken = (res, email) => {
+    if (!process.env.JWT_SECRET) {
+        throw new Error('JWT_SECRET is not defined');
+    }
 
-//register a user
-//route: POST /api/users/register
-//access: Public
+    const token = jwt.sign(
+        { email },
+        process.env.JWT_SECRET,
+        { expiresIn: '1h' }
+    );
 
+    res.cookie('token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 3600000,
+    });
+};
+
+// Register a user
+// Route: POST /api/users/register
+// Access: Public
 export const registerUser = async (req, res) => {
     try {
         const { name, email, password } = req.body;
-        const role = "admin"; // Default role is 'customer'
+        const role = "admin"; // Default role is 'admin'
 
         console.log("This is the name:", name);
         console.log("This is the role:", role);
@@ -32,7 +49,7 @@ export const registerUser = async (req, res) => {
             name,
             email,
             password,
-            role // Assign role or default to 'customer'
+            role
         });
 
         // Hash the password
@@ -42,8 +59,10 @@ export const registerUser = async (req, res) => {
         // Save the user to the database
         await user.save();
 
-        generateToken(res, email)
-        console.log("Tkn created!")
+        // Generate token and set it in the response's cookies
+        generateToken(res, email);
+        console.log("Token created!");
+
         // Send success response
         res.status(201).json({
             message: "User registered successfully"
@@ -55,20 +74,18 @@ export const registerUser = async (req, res) => {
             message: "Server error" // Generic error message for the client
         });
     }
-
-
 };
 
-//login a user'
-//route: POST /api/users/login
-//access: Public
-
+// Login a user
+// Route: POST /api/users/login
+// Access: Public
 export const loginUser = async (req, res) => {
     const { email, password } = req.body;
 
     try {
         console.log("This is the email:", email);
         console.log("This is the password:", password);
+
         // Find the user by email
         const user = await User.findOne({ email });
         if (!user) {
@@ -81,12 +98,11 @@ export const loginUser = async (req, res) => {
             return res.status(401).json({ message: "Invalid email or password." });
         }
 
-        // Generate a token and set it in the response's cookies
+        // Generate token and set it in the response's cookies
         generateToken(res, user.email);
 
-        // Return a success message instead of the token
+        // Return a success message
         res.json({ user, message: "Login successful" });
-
 
     } catch (error) {
         console.error("Login error:", error);
@@ -95,21 +111,18 @@ export const loginUser = async (req, res) => {
 };
 
 // Get all users
-// route: GET /api/users
-// access: Private/Admin
-
+// Route: GET /api/users
+// Access: Private/Admin
 export const getUsers = async (req, res) => {
     const users = await User.find({});
     res.json(users);
-}
+};
 
-
-// Get user profile 
-// route: GET /api/users/profile
-// access: Private
-
+// Get user profile
+// Route: GET /api/users/profile
+// Access: Private
 export const getUserProfile = async (req, res) => {
-    const user = await User.findById(req.user._id)
+    const user = await User.findById(req.user._id);
     if (user) {
         res.json({
             _id: user._id,
@@ -120,12 +133,11 @@ export const getUserProfile = async (req, res) => {
     } else {
         res.status(404).json({ message: "User not found" });
     }
-}
+};
 
-//update user profile
-//route: PUT /api/users/profile
-//access: Private
-
+// Update user profile
+// Route: PUT /api/users/profile
+// Access: Private
 export const updateUserProfile = async (req, res) => {
     const user = await User.findById(req.user._id);
 
@@ -134,7 +146,8 @@ export const updateUserProfile = async (req, res) => {
         user.email = req.body.email || user.email;
 
         if (req.body.password) {
-            user.password = req.body.password;
+            const salt = await bcrypt.genSalt(10);
+            user.password = await bcrypt.hash(req.body.password, salt);
         }
 
         const updatedUser = await user.save();
@@ -146,39 +159,33 @@ export const updateUserProfile = async (req, res) => {
             role: updatedUser.role
         });
     } else {
-        res.status(404)
-        throw new Error('User not found')
+        res.status(404).json({ message: 'User not found' });
     }
-}
+};
 
-
-//delete user
-//route: DELETE /api/users/:id
-//access: Private/Admin
-
+// Delete user
+// Route: DELETE /api/users/:id
+// Access: Private/Admin
 export const deleteUser = async (req, res) => {
-    const user = await User.findById(req.params.id)
+    const user = await User.findById(req.params.id);
 
     if (user) {
-        await user.remove()
-        res.json({ message: 'User removed' })
+        await user.remove();
+        res.json({ message: 'User removed' });
     } else {
-        res.status(404)
-        throw new Error('User not found')
+        res.status(404).json({ message: 'User not found' });
     }
-}
+};
 
-//get user by id
-//route: GET /api/users/:id
-//access: Private/Admin
-
+// Get user by ID
+// Route: GET /api/users/:id
+// Access: Private/Admin
 export const getUserById = async (req, res) => {
-    const user = await User.findById(req.params.id).select('-password')
+    const user = await User.findById(req.params.id).select('-password');
 
     if (user) {
-        res.json(user)
+        res.json(user);
     } else {
-        res.status(404)
-        throw new Error('User not found')
+        res.status(404).json({ message: 'User not found' });
     }
-}
+};
