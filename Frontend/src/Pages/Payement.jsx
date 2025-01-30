@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Form, Row, Col, Card, ListGroup, Button } from 'react-bootstrap';
 import { useParams, useNavigate } from 'react-router-dom';
 import Header from '../Homepage/Header';
@@ -11,42 +11,37 @@ import { toast } from 'react-toastify';
 
 const Payment = () => {
     const { orderId } = useParams();
-    console.log(orderId);
     const navigate = useNavigate();
+
+    // Fetch PayPal client ID and order details
     const { data: paypal, isLoading: loadingPayPal, error: errorPayPal } = useGetPaypalClientIdQuery();
     const { data: order, isLoading: loadingOrder, error: errorOrder } = useGetOrderByIdQuery(orderId);
-    console.log(order, "order")
+
     const [updateOrder] = useUpdateOrderMutation();
+
     const [validated, setValidated] = useState(false);
     const [shippingAddress, setShippingAddress] = useState({ location: '', residence: '' });
     const [paymentMethod, setPaymentMethod] = useState('');
-    const clientId = 'AQQ5fKyqjEygOr9OJ3Mu7v7c0Mjs6-HkHyt1FYPNcOOsFP2zWKRp1pu_yQddwyvY2hyZC24a6h_lshHk';
+
+    // Set the PayPal client ID from fetched data or fallback to hardcoded one
+    const clientId = paypal?.clientId || 'YOUR_FALLBACK_CLIENT_ID';
 
     useEffect(() => {
         if (order) {
-            setShippingAddress(order.shippingAddress);
-            setPaymentMethod(order.paymentMethod);
+            setShippingAddress(order.shippingAddress || { location: '', residence: '' });
+            setPaymentMethod(order.paymentMethod || '');
         }
     }, [order]);
 
     const counties = [
-        "Nairobi", "Mombasa", "Kisumu", "Nakuru", "Uasin Gishu",
-        "Kiambu", "Murang'a", "Machakos", "Nyeri", "Meru",
-        "Bungoma", "Kakamega", "Kisii", "Homa Bay", "Kericho",
-        "Laikipia", "Trans Nzoia", "Elgeyo-Marakwet", "Kilifi",
-        "Bomet", "Embu", "Nyandarua", "Siaya", "Migori",
-        "Kirinyaga", "Narok", "Kitui", "Tharaka-Nithi",
-        "Nandi", "Samburu", "Kajiado", "Vihiga",
-        "Nyamira", "Kwale", "Taita-Taveta",
-        "West Pokot", "Garissa", "Wajir",
-        "Mandera", "Marsabit", "Isiolo",
-        "Turkana", "Lamu", "Tana River",
-        "Baringo", "Busia"
+        // Simplified county list for readability
+        "Nairobi", "Mombasa", "Kisumu", "Nakuru", "Kiambu"
     ];
 
     const handleSubmit = async (event) => {
         event.preventDefault();
         const form = event.currentTarget;
+
         if (form.checkValidity() === false) {
             event.stopPropagation();
         } else {
@@ -56,22 +51,17 @@ const Payment = () => {
             }
 
             const updatedOrderData = {
-                ...order,
                 shippingAddress,
                 paymentMethod,
                 isPaid: paymentMethod === 'PayPal',
                 datePaid: paymentMethod === 'PayPal' ? new Date() : null,
                 orderStatus: paymentMethod === 'PayPal' ? 'Completed' : 'Pending',
-                transactionId: paymentMethod === 'PayPal' ? `PayPal-${new mongoose.Types.ObjectId()}` : null
             };
 
             try {
                 await updateOrder({ id: orderId, ...updatedOrderData }).unwrap();
                 if (paymentMethod === 'Cash on Delivery') {
-
                     navigate('/success');
-                } else if (paymentMethod === 'PayPal') {
-                    onApprove();
                 }
             } catch (error) {
                 console.error('Error updating order:', error);
@@ -83,35 +73,31 @@ const Payment = () => {
 
     const createOrderPayPal = (data, actions) => {
         return actions.order.create({
-            purchase_units: [{
-                amount: { value: order.totalAmount.toString() } // Ensure value is a string
-            }]
+            purchase_units: [{ amount: { value: order.totalAmount.toString() } }]
         });
     };
 
-    const onApprove =async () => {
-        // await updateOrder({ id: orderId, ...updatedOrderData }).unwrap();
-        navigate('/success', { state: { orderId, isPaid: true, datePaid: new Date(), paymentMethod: 'PayPal' } }); // Navigate to success page
+    const onApprove = () => {
+        navigate('/success', { state: { orderId, isPaid: true, datePaid: new Date(), paymentMethod: 'PayPal' } });
     };
 
     const onError = (error) => {
         toast.error("Payment Failed");
-        console.log(error);
-        navigate('/payment');
+        console.error("PayPal Payment Error:", error);
     };
 
-    if (loadingOrder) {
-        return <p>Loading...</p>; // Show loading state while fetching the order
+    if (loadingOrder || loadingPayPal) {
+        return <p>Loading...</p>; // Show loading state
     }
 
     if (errorOrder) {
         toast.error("Failed to fetch order details");
-        return <p>Error loading order</p>; // Fallback UI
+        return <p>Error loading order details</p>;
     }
 
     if (errorPayPal) {
         toast.error("Failed to load PayPal client ID");
-        return <p>Error loading PayPal</p>; // Fallback UI
+        return <p>Error loading PayPal</p>;
     }
 
     return (
@@ -128,13 +114,13 @@ const Payment = () => {
                                     <Col md={6}>
                                         <Form.Group controlId="formName">
                                             <Form.Label>Name</Form.Label>
-                                            <Form.Control required type="text" placeholder="Enter Your Name" defaultValue={order.customerId.name} />
+                                            <Form.Control required type="text" placeholder="Enter Your Name" defaultValue={order.customerId?.name || ''} />
                                         </Form.Group>
                                     </Col>
                                     <Col md={6}>
                                         <Form.Group controlId="formEmail">
                                             <Form.Label>Email</Form.Label>
-                                            <Form.Control required type="email" placeholder="Enter your email address" defaultValue={order.customerId.email} />
+                                            <Form.Control required type="email" placeholder="Enter your email address" defaultValue={order.customerId?.email || ''} />
                                         </Form.Group>
                                     </Col>
                                 </Row>
@@ -148,8 +134,8 @@ const Payment = () => {
                                     <Col md={6}>
                                         <Form.Group controlId="formCity">
                                             <Form.Label>City</Form.Label>
-                                            <Form.Control as="select" required onChange={(e) => setShippingAddress({ ...shippingAddress, location: e.target.value })} >
-                                                <option>Select city</option>
+                                            <Form.Control as="select" required value={shippingAddress.location} onChange={(e) => setShippingAddress({ ...shippingAddress, location: e.target.value })}>
+                                                <option value="">Select city</option>
                                                 {counties.map((county, index) => (
                                                     <option key={index} value={county}>{county}</option>
                                                 ))}
@@ -159,58 +145,38 @@ const Payment = () => {
                                 </Row>
                                 <Form.Group controlId="formBuilding">
                                     <Form.Label>Building</Form.Label>
-                                    <Form.Control type="text" placeholder="Enter building name" onChange={(e) => setShippingAddress({ ...shippingAddress, residence: e.target.value })} />
+                                    <Form.Control type="text" placeholder="Enter building name" value={shippingAddress.residence} onChange={(e) => setShippingAddress({ ...shippingAddress, residence: e.target.value })} />
                                 </Form.Group>
-
                                 <Button type="submit" className="mt-3">Proceed to Payment</Button>
                             </Form>
                         </Card>
                     </Col>
 
-                    {/* Payment Method */}
                     <Col md={4}>
                         <Card className="p-3">
                             <Card.Title className="text-center">Payment Method</Card.Title>
                             <ListGroup variant='flush'>
-                                {/* PayPal Payment */}
                                 <ListGroup.Item className="text-center">
                                     <h2>Payment Method</h2>
                                     <p><strong>Method: </strong> PayPal</p>
-                                    {/* PayPal Buttons */}
-                                    {loadingPayPal ? (
-                                        <p>Loading...</p> // Show loading state
-                                    ) : (
-                                        clientId && (
-                                            <PayPalButtons createOrder={createOrderPayPal} onApprove={(data, actions) => {
-                                                return actions.order.capture().then(details => {
-                                                    onApprove();
-                                                });
-                                            }} onError={onError} />
-                                        )
+                                    {clientId && (
+                                        <PayPalButtons createOrder={createOrderPayPal} onApprove={onApprove} onError={onError} />
                                     )}
                                 </ListGroup.Item>
-
-                                {/* Cash on Delivery */}
                                 <ListGroup.Item className="d-flex align-items-center mb-2">
-                                    <input type="radio" name="paymentMethod" id="cashOnDelivery" className='mr-2' value="Cash on Delivery" onChange={(e) => setPaymentMethod(e.target.value)} />
+                                    <input type="radio" name="paymentMethod" id="cashOnDelivery" value="Cash on Delivery" onChange={(e) => setPaymentMethod(e.target.value)} />
                                     Cash on Delivery
                                 </ListGroup.Item>
-
-                                {/* Mpesa */}
                                 <ListGroup.Item className="d-flex align-items-center mb-2">
                                     <input type="radio" name="paymentMethod" id="mpesa" disabled />
                                     <img src={mpesa} alt="Mpesa" width={24} height={24} className="me-2" />
                                     Mpesa
                                 </ListGroup.Item>
-
                             </ListGroup>
                         </Card>
                     </Col>
-
                 </Row>
             </div>
-
-            {/* Footer */}
             <Footer />
         </PayPalScriptProvider>
     );

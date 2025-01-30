@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
-import { io } from 'socket.io-client';
-
+import { io } from "socket.io-client";
 import { Row, Col, Button, Nav, Tab } from 'react-bootstrap';
 import { useParams } from 'react-router-dom';
 import { useCart } from '../context/CartContext'; // Import useCart
@@ -19,19 +18,20 @@ const ProductDetails = () => {
   const [quantity, setQuantity] = useState(1);
   const [isAdded, setIsAdded] = useState(false);
   const [inStock, setInStock] = useState(true);
+  const [allProducts, setAllProducts] = useState([]); // To store all products
 
-  const socket = io('http://localhost:8000'); 
+  const socket = io("http://localhost:8000");
 
-socket.on('stockUpdate', (data) => {
-  console.log('Stock update received:', data);
+  socket.on('stockUpdate', (data) => {
+    console.log('Stock update received:', data);
 
-  // Update the UI based on the stock update
-  const productElement = document.getElementById(`product-${data.productId}`);
-  if (productElement) {
-    productElement.querySelector('.quantity').textContent = data.quantity;
-    productElement.querySelector('.stock-status').textContent = data.inStock ? 'In Stock' : 'Out of Stock';
-  }
-});
+    // Update the UI based on the stock update
+    const productElement = document.getElementById(`product-${data.productId}`);
+    if (productElement) {
+      productElement.querySelector('.quantity').textContent = data.quantity;
+      productElement.querySelector('.stock-status').textContent = data.inStock ? 'In Stock' : 'Out of Stock';
+    }
+  });
 
   // Fetch product details
   useEffect(() => {
@@ -55,6 +55,14 @@ socket.on('stockUpdate', (data) => {
       .then((res) => res.json())
       .then((data) => Reviews(data))
       .catch((err) => console.error('Error fetching reviews:', err));
+
+    // Fetch all products and set them in the allProducts state
+    fetch('http://localhost:8000/api/products')
+      .then((res) => res.json())
+      .then((data) => {
+        setAllProducts(data); // Store the products in the state
+      })
+      .catch((err) => console.error('Error fetching all products:', err));
   }, [id]);
 
   // Handle quantity changes
@@ -199,6 +207,26 @@ socket.on('stockUpdate', (data) => {
             </div>
           </Col>
         </Row>
+
+        {/* Optional: Display all products (if needed) */}
+        <div className="all-products mt-5">
+          <h2>All Products</h2>
+          <Row>
+            {allProducts.map((product) => (
+              <Col key={product._id} md={4}>
+                <div className="product-card">
+                  <img
+                    src={`http://localhost:8000${product.image}`}
+                    alt={product.name}
+                    className="img-fluid"
+                  />
+                  <h5>{product.name}</h5>
+                  <p>{product.price}</p>
+                </div>
+              </Col>
+            ))}
+          </Row>
+        </div>
       </div>
       <Footer />
     </>
