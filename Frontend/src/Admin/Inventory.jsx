@@ -336,7 +336,6 @@ const Inventory = () => {
         </StyledContainer>
     );
 };
-
 export default Inventory;
 
 // Styled Components (unchanged)
