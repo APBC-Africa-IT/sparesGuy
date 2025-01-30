@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import  { useState, useEffect } from 'react';
 import { Table, Button, Modal, Form, Container, Card, Row, Col } from 'react-bootstrap';
 import { FaPlus, FaEdit, FaTrash, FaImage } from 'react-icons/fa';
 import styled from 'styled-components';
@@ -11,39 +11,36 @@ import {
 } from '../slices/productApiSlice';
 
 const Inventory = () => {
-    const { data: parts, isLoading, refetch } = useGetProductsQuery();
-    console.log(parts, "Make sure the parts exixts with ID"); // Add this line to inspect the parts data
+    const { data: parts, refetch } = useGetProductsQuery();
     const [createProduct] = useCreateProductMutation();
     const [updateProduct] = useUpdateProductMutation();
     const [deleteProduct] = useDeleteProductMutation();
     const [showModal, setShowModal] = useState(false);
     const [currentPart, setCurrentPart] = useState(null);
     const [previewImage, setPreviewImage] = useState(null);
+    const [partId, setPartId] = useState(null);
+
+    // Fetch product details when partId changes
+    const { data: fetchedPart, isFetching: isFetchingPart } = useGetProductByIdQuery(partId, {
+        skip: !partId,
+    });
+
+    useEffect(() => {
+        if (fetchedPart) {
+            setCurrentPart(fetchedPart);
+            setPreviewImage(fetchedPart.image || null);
+        }
+    }, [fetchedPart]);
 
     const handleClose = () => {
         setShowModal(false);
         setCurrentPart(null);
         setPreviewImage(null);
+        setPartId(null);
     };
 
-    const handleShow = (partId) => {
-        if (partId) {
-            const { data: fetchedPart, isFetching, error } = useGetProductByIdQuery(partId, {
-                skip: !partId,
-            });
-
-            if (!isFetching && fetchedPart) {
-                setCurrentPart(fetchedPart);
-                setPreviewImage(fetchedPart.image || null);
-            } else if (error) {
-                console.error("Error fetching product by ID:", error);
-                alert(`Failed to fetch product: ${error?.data?.error || "Unknown error"}`);
-            }
-        } else {
-            setCurrentPart(null);
-            setPreviewImage(null);
-        }
-
+    const handleShow = (id) => {
+        setPartId(id);
         setShowModal(true);
     };
 
@@ -63,7 +60,7 @@ const Inventory = () => {
         const formData = new FormData(event.target);
         const newProduct = {
             name: formData.get('name'),
-            image: 'https://example.com/images/toyota-corolla-engine.jpg',
+            image: previewImage || 'https://example.com/images/toyota-corolla-engine.jpg',
             price: Number(formData.get('price')),
             description: formData.get('description'),
             additionalInfo: formData.get('additionalInfo') || '',
@@ -78,13 +75,14 @@ const Inventory = () => {
 
         try {
             if (currentPart) {
-                await updateProduct({ ...newProduct, id: currentPart.id }).unwrap();
+                await updateProduct({ ...newProduct, id: currentPart._id }).unwrap();
                 alert('Product successfully updated!');
             } else {
                 await createProduct(newProduct).unwrap();
                 alert('Product successfully created!');
             }
             handleClose();
+            refetch();
         } catch (error) {
             console.error('Error saving product:', error);
             alert(`Failed to save product: ${error?.data?.error || 'Unknown error'}`);
@@ -92,7 +90,6 @@ const Inventory = () => {
     };
 
     const handleDelete = async (id) => {
-        console.log('Deleting product with ID:', id);
         if (window.confirm('Are you sure you want to delete this item?')) {
             try {
                 await deleteProduct(id).unwrap();
@@ -104,8 +101,6 @@ const Inventory = () => {
             }
         }
     };
-
-    console.log(parts); // Add this line to inspect the parts data
 
     return (
         <StyledContainer fluid>
@@ -133,16 +128,14 @@ const Inventory = () => {
                                 <th>Name</th>
                                 <th>Quantity</th>
                                 <th>Price</th>
-                                <th>Category</th> {/* Ensure Category Column is Included */}
+                                <th>Category</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {parts?.map(part => (
-                                <tr key={part._id}> {/* Add key prop */}
-                                <td>
-                                    {part._id}
-                                </td>
+                            {Array.isArray(parts) && parts.map(part => (
+                                <tr key={part._id}>
+                                    <td>{part._id}</td>
                                     <td>
                                         {part.image ? (
                                             <ImagePreview src={part.image} alt={part.name} />
@@ -157,7 +150,7 @@ const Inventory = () => {
                                     <td>
                                         <ActionButton
                                             variant="warning"
-                                            onClick={() => handleShow(part.id)}
+                                            onClick={() => handleShow(part._id)}
                                             style={{ backgroundColor: '#DAA520', borderColor: '#DAA520' }}
                                         >
                                             <FaEdit /> Edit
@@ -182,7 +175,7 @@ const Inventory = () => {
                     <Modal.Title>{currentPart ? 'Edit Part' : 'Add New Product'}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    {isLoading ? (
+                    {isFetchingPart ? (
                         <p>Loading product details...</p>
                     ) : (
                         <Form onSubmit={handleSave}>
@@ -210,11 +203,11 @@ const Inventory = () => {
                             <Form.Group className="mb-3">
                                 <Form.Label>Quantity</Form.Label>
                                 <Form.Control
-                                    type="text"
-                                    name="name"
-                                    defaultValue={currentPart ? currentPart.name : ''}
+                                    type="number"
+                                    name="quantity"
+                                    defaultValue={currentPart ? currentPart.quantity : ''}
                                     required
-                                    placeholder="enter quantity"
+                                    placeholder="Enter quantity"
                                 />
                             </Form.Group>
 
@@ -223,6 +216,7 @@ const Inventory = () => {
                                 <Form.Control
                                     as="textarea"
                                     name="description"
+                                    defaultValue={currentPart ? currentPart.description : ''}
                                     placeholder="Enter product description"
                                     required
                                 />
@@ -233,6 +227,7 @@ const Inventory = () => {
                                 <Form.Control
                                     type="text"
                                     name="additionalInfo"
+                                    defaultValue={currentPart ? currentPart.additionalInfo : ''}
                                     placeholder="Enter additional product info"
                                 />
                             </Form.Group>
@@ -242,6 +237,7 @@ const Inventory = () => {
                                 <Form.Control
                                     type="text"
                                     name="make"
+                                    defaultValue={currentPart ? currentPart.make : ''}
                                     placeholder="Enter make (e.g., Toyota)"
                                     required
                                 />
@@ -252,6 +248,7 @@ const Inventory = () => {
                                 <Form.Control
                                     type="text"
                                     name="model"
+                                    defaultValue={currentPart ? currentPart.model : ''}
                                     placeholder="Enter model (e.g., Corolla)"
                                     required
                                 />
@@ -262,6 +259,7 @@ const Inventory = () => {
                                 <Form.Control
                                     type="number"
                                     name="year"
+                                    defaultValue={currentPart ? currentPart.year : ''}
                                     min="1900"
                                     max={new Date().getFullYear()}
                                     placeholder="Enter year"
@@ -271,7 +269,7 @@ const Inventory = () => {
 
                             <Form.Group className="mb-3">
                                 <Form.Label>Transmission</Form.Label>
-                                <Form.Control as="select" name="transmission" required>
+                                <Form.Control as="select" name="transmission" defaultValue={currentPart ? currentPart.transmission : ''} required>
                                     <option value="Automatic">Automatic</option>
                                     <option value="Manual">Manual</option>
                                 </Form.Control>
@@ -279,7 +277,7 @@ const Inventory = () => {
 
                             <Form.Group className="mb-3">
                                 <Form.Label>Condition</Form.Label>
-                                <Form.Control as="select" name="condition" required>
+                                <Form.Control as="select" name="condition" defaultValue={currentPart ? currentPart.condition : ''} required>
                                     <option value="New">New</option>
                                     <option value="Used">Used</option>
                                 </Form.Control>
@@ -287,17 +285,17 @@ const Inventory = () => {
 
                             <Form.Group className="mb-3">
                                 <Form.Label>Fuel Type</Form.Label>
-                                <Form.Control as="select" name="fuelType" required>
+                                <Form.Control as="select" name="fuelType" defaultValue={currentPart ? currentPart.fuelType : ''} required>
                                     <option value="Petrol">Petrol</option>
                                     <option value="Diesel">Diesel</option>
                                     <option value="Gasoline">Gasoline</option>
-                                    <option value="All  applicable">All  applicable</option>
+                                    <option value="All applicable">All applicable</option>
                                 </Form.Control>
                             </Form.Group>
 
                             <Form.Group className="mb-3">
                                 <Form.Label>Category</Form.Label>
-                                <Form.Control as="select" name="category" required>
+                                <Form.Control as="select" name="category" defaultValue={currentPart ? currentPart.category : ''} required>
                                     <option value="Body Part">Body Part</option>
                                     <option value="Engine Part">Engine Part</option>
                                     <option value="Electrical Components">Electrical Components</option>
@@ -311,6 +309,7 @@ const Inventory = () => {
                                 <Form.Control
                                     type="number"
                                     name="price"
+                                    defaultValue={currentPart ? currentPart.price : ''}
                                     step="0.01"
                                     required
                                     placeholder="Enter price"
@@ -338,7 +337,7 @@ const Inventory = () => {
 
 export default Inventory;
 
-// Styled Components
+// Styled Components (unchanged)
 const StyledContainer = styled(Container)`
   padding: 2rem;
   background: #FFFFFF;
@@ -417,4 +416,4 @@ const ImagePreview = styled.img`
   height: auto;
   margin: 10px 0;
   border-radius: 5px;
-`;
+`; 

@@ -1,20 +1,19 @@
-
 import mongoose from "mongoose";
+import { v4 as uuidv4 } from 'uuid';
 
 const discountSchema = new mongoose.Schema({
-    code: { type: String, required: true, unique: true }, 
-    discountType: { type: String, enum: ['percentage', 'fixed'], required: true },
-    discountValue: { type: Number, required: true }, 
-    maxUsage: { type: Number, default: 1 }, 
-    timesUsed: { type: Number, default: 0 }, 
-    expirationDate: { type: Date, required: true },
-    minimumOrderAmount: { type: Number, default: 0 }, 
-    isActive: { type: Boolean, default: true } 
+  code: { type: String, default: uuidv4, unique: true },
+  discountPercentage: { type: Number, required: true, min: 0, max: 100 },
+  startDate: { type: Date, required: true },
+  endDate: { type: Date, required: true },
+  isValid: { type: Boolean, default: true }
 });
 
-discountSchema.methods.isValid = function () {
-    const currentDate = new Date();
-    return this.isActive && currentDate < this.expirationDate && this.timesUsed < this.maxUsage;
+discountSchema.methods.isValid = function() {
+  const now = new Date();
+  return this.isValid && this.startDate <= now && this.endDate >= now;
 };
 
-module.exports = mongoose.model('Discount', discountSchema);
+const Discount = mongoose.model("Discount", discountSchema);
+
+export default Discount;

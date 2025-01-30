@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Container, Row, Col, Form, Button, Card, Toast } from 'react-bootstrap';
 import { FaUser, FaEnvelope, FaLock, FaGoogle, FaCheckCircle, FaExclamationCircle } from 'react-icons/fa';
 import LoginFrame from '../Homepage/HomepageImages/gears.jpg';
@@ -9,7 +9,7 @@ import {signInWithGoogle, auth} from "../firebase"
 import { onAuthStateChanged } from 'firebase/auth';
 
 const RegistrationPage = () => {
-  const [user, setUser] = useState(null)
+  const [, setUser] = useState(null)
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -50,7 +50,7 @@ const RegistrationPage = () => {
     }
 
     try {
-      const res = await registerUser({ name, email, password }).unwrap();
+      await registerUser({ name, email, password }).unwrap();
       showNotification('Registration successful! Redirecting to login...', 'success');
       setTimeout(() => {
         navigate('/login');
@@ -75,7 +75,7 @@ const RegistrationPage = () => {
     try {
     const res =  await signInWithGoogle()
      //Handle sending res data to my mongo db database
-     
+
       console.log("You were logged In",res)
       navigate("/shop")
       
