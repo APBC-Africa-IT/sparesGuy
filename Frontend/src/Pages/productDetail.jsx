@@ -1,11 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import { io } from 'socket.io-client';
+
 import { Row, Col, Button, Nav, Tab } from 'react-bootstrap';
 import { useParams } from 'react-router-dom';
-
-import RelatedProducts from './relatedProducts';
-
-// import RelatedProducts from './RelatedProducts';
-
+import { useCart } from '../context/CartContext'; // Import useCart
 import Header from '../Homepage/Header.jsx';
 import Footer from '../Homepage/Footer.jsx';
 import Reviews from './Reviews';
@@ -13,23 +11,29 @@ import Description from './description';
 
 const ProductDetails = () => {
   const { id } = useParams();
+  const { addToCart, cartCount } = useCart(); // Use addToCart and cartCount from context
   const [activeTab, setActiveTab] = useState('description');
-  const handleTabSelect = (key) => setActiveTab(key);
-
-  const [cartCount, setCartCount] = useState(() => {
-    const savedCart = JSON.parse(localStorage.getItem('cart'));
-    return savedCart ? savedCart.reduce((acc, item) => acc + item.quantity, 0) : 0;
-  });
-
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [quantity, setQuantity] = useState(1);
-
-  // const [cartCount, setCartCount] = useState(0);
-
   const [isAdded, setIsAdded] = useState(false);
+  const [inStock, setInStock] = useState(true);
 
+  const socket = io('http://localhost:8000'); 
+
+socket.on('stockUpdate', (data) => {
+  console.log('Stock update received:', data);
+
+  // Update the UI based on the stock update
+  const productElement = document.getElementById(`product-${data.productId}`);
+  if (productElement) {
+    productElement.querySelector('.quantity').textContent = data.quantity;
+    productElement.querySelector('.stock-status').textContent = data.inStock ? 'In Stock' : 'Out of Stock';
+  }
+});
+
+  // Fetch product details
   useEffect(() => {
     setLoading(true);
     fetch(`/api/products/${id}`)
@@ -39,6 +43,7 @@ const ProductDetails = () => {
       })
       .then((data) => {
         setProduct(data);
+        setInStock(data.inStock);
         setLoading(false);
       })
       .catch((err) => {
@@ -52,32 +57,44 @@ const ProductDetails = () => {
       .catch((err) => console.error('Error fetching reviews:', err));
   }, [id]);
 
+  // Handle quantity changes
   const handleQuantityChange = (action) => {
     if (action === 'increment') setQuantity(quantity + 1);
     else if (action === 'decrement' && quantity > 1) setQuantity(quantity - 1);
   };
 
-  const handleAddToCart = () => {
-    const cartItem = { ...product, quantity };
-    setCartCount(cartCount + quantity);
-    setCart((prevCart) => {
-      const updatedCart = [...prevCart, cartItem];
-      localStorage.setItem('cart', JSON.stringify(updatedCart));
-      return updatedCart;
-    });
-
-    fetch('/api/cart', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(cartItem),
-    })
-      .then((response) => response.json())
-      .then(() => setIsAdded(true))
-      .catch((error) => {
-        console.error('Error:', error);
-        setIsAdded(false);
+  // Handle purchase
+  const handlePurchase = async () => {
+    try {
+      const response = await fetch(`/api/products/${id}/purchase`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ quantityPurchased: quantity }),
       });
+
+      if (response.ok) {
+        const updatedProduct = await response.json();
+        setInStock(updatedProduct.inStock);
+        alert('Purchase successful!');
+      } else {
+        alert('Failed to purchase product.');
+      }
+    } catch (error) {
+      console.error('Error purchasing product:', error);
+    }
   };
+
+  // Handle adding to cart
+  const handleAddToCart = () => {
+    if (!product) return;
+
+    const cartItem = { ...product, quantity };
+    addToCart(cartItem); // Use addToCart from context
+    setIsAdded(true);
+  };
+
+  // Handle tab selection
+  const handleTabSelect = (key) => setActiveTab(key);
 
   if (error) {
     return (
@@ -135,13 +152,12 @@ const ProductDetails = () => {
           </Col>
 
           {/* Right Column */}
-          
           <Col md={6}>
             <h4 className="product-title">{product.name}</h4>
             <p className="text-muted">{product.description}</p>
             <h4 className="product-price text-success">Ksh {product.price}</h4>
-            <p className={product.inStock ? 'text-success' : 'text-danger'}>
-              {product.inStock ? 'In Stock' : 'Out of Stock'}
+            <p className={inStock ? 'text-success' : 'text-danger'}>
+              {inStock ? 'In Stock' : 'Out of Stock'}
             </p>
             <div className="quantity-controls my-3 d-flex align-items-center">
               <Button
@@ -156,6 +172,13 @@ const ProductDetails = () => {
                 +
               </Button>
             </div>
+            <Button
+              variant="primary"
+              onClick={handlePurchase}
+              disabled={!inStock}
+            >
+              Buy Now
+            </Button>
             <Button onClick={handleAddToCart} disabled={isAdded} className="mt-2">
               {isAdded ? 'Added to Cart' : 'Add to Cart'}
             </Button>
@@ -176,7 +199,6 @@ const ProductDetails = () => {
             </div>
           </Col>
         </Row>
-        {/* <RelatedProducts /> */}
       </div>
       <Footer />
     </>

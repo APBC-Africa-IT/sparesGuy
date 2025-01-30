@@ -1,126 +1,104 @@
-
+import http from 'http';
 import express from 'express';
+import { Server } from 'socket.io';
+import { socketHandler } from './socketHandler.js';
+import { EventEmitter } from 'events';
 import connectDB from './Config/db.js';
-import userRoutes from './routes/userRoutes.js';
 import cors from 'cors';
 import bodyParser from 'body-parser';
-import productRoutes from './routes/productRoutes.js';
-import relatedProductsRoutes from './routes/relatedProductsRoutes.js'
-import CategoryRoutes from './routes/CategoryRoutes.js';
-import paymentInfoRoutes from './routes/paymentInfoRoutes.js';
-import AuthMiddleware from './Middleware/AuthMiddleware.js';
-import authMiddleware from './Middleware/AuthMiddleware.js';
-import cartRoutes from './routes/cartRoutes.js';
-import ReviewRoutes from './routes/ReviewRoutes.js';
-import OrderRoutes from './routes/OrderRoutes.js';
-import CheckoutRoutes from './routes/CheckoutRoutes.js';
-import contactRoutes from './routes/contactRoutes.js';
-import deliveryScheRoutes from './routes/deliveryScheRoutes.js';
-import { requireAdmin } from './Middleware/roleMiddleware.js';
-import NotificationRoutes from './routes/NotificationRoutes.js';
-import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import dotenv from 'dotenv';
 
-
-dotenv.config();
-
-
-const app = express();
-const PORT = process.env.PORT || 8000;
-
+// Import Routes
+import userRoutes from './routes/userRoutes.js';
+import productRoutes from './routes/productRoutes.js';
+import relatedProductsRoutes from './routes/relatedProductsRoutes.js';
+import categoryRoutes from './routes/CategoryRoutes.js';
+import paymentInfoRoutes from './routes/paymentInfoRoutes.js';
+import cartRoutes from './routes/cartRoutes.js';
+import reviewRoutes from './routes/ReviewRoutes.js';
+import orderRoutes from './routes/OrderRoutes.js';
+import checkoutRoutes from './routes/CheckoutRoutes.js';
+import contactRoutes from './routes/contactRoutes.js';
+import deliveryScheRoutes from './routes/deliveryScheRoutes.js';
+import notificationRoutes from './routes/NotificationRoutes.js';
 
 // Middleware
-app.use(cors()); // Enable CORS for all routes
+import authMiddleware, { requireAdmin } from './Middleware/AuthMiddleware.js';
+
+// Load environment variables
+dotenv.config();
+
+// Increase EventEmitter max listeners
+EventEmitter.defaultMaxListeners = 15;
+
+const app = express();
+const server = http.createServer(app);
+const io = new Server(server);
+
+// Attach Socket.IO handler
+socketHandler(io);
+
+// Middleware
+app.use(cors());
 app.use(bodyParser.json());
-app.use(cookieParser()); // To parse cookies from the request
-app.use(express.json()); // Make sure body data can be parsed
+app.use(cookieParser());
+app.use(express.json());
 
-
-// Serve files in the uploads directory
+// Serve uploads
 app.use('/uploads', express.static('uploads'));
 
-
 // Connect to the database
-connectDB();
+connectDB()
+  .then(() => console.log('Database connected successfully'))
+  .catch((err) => console.error('Database connection error:', err));
 
+// Serve React frontend
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const frontendPath = path.join(__dirname, '../Frontend/dist'); // Adjust the path if needed
+const frontendPath = process.env.FRONTEND_PATH || path.join(__dirname, '../Frontend/dist');
 app.use(express.static(frontendPath));
 
-// Fallback for React SPA
+// Fallback for React SPA (for GET requests only)
 app.get('*', (req, res) => {
-  res.sendFile(path.join(frontendPath, 'index.html'));
+  if (req.method === 'GET') {
+    res.sendFile(path.join(frontendPath, 'index.html'));
+  }
 });
 
-// User routes
+// Routes
 app.use('/api/users', userRoutes);
-
-// Product routes
 app.use('/api/products', productRoutes);
-
-
-// related Product routes
 app.use('/api/', relatedProductsRoutes);
-
-// ContactUs routes
 app.use('/api/contact', contactRoutes);
-
-// Cart routes
 app.use('/api/cart', cartRoutes);
-
-// Payment routes
 app.use('/api/payments', paymentInfoRoutes);
-
-// Order routes
-app.use('/api/orders', OrderRoutes);
-
-// Review routes
-app.use('/api/review', ReviewRoutes);
-
-// Checkout routes
-app.use('/api/checkout', CheckoutRoutes);
-
-// Delivery routes
+app.use('/api/orders', orderRoutes);
+app.use('/api/review', reviewRoutes);
+app.use('/api/checkout', checkoutRoutes);
 app.use('/api/delivery', deliveryScheRoutes);
+app.use('/api/categories', categoryRoutes);
+app.use('/api/notifications', notificationRoutes);
 
-// Category routes
-app.use('/api/categories', CategoryRoutes);
-
-// Protect the profile route
-app.get('/profile', AuthMiddleware, (req, res) => {
-    res.json({ message: `Welcome, ${req.user.userId}!` });
+// Protected Routes
+app.get('/profile', authMiddleware, (req, res) => {
+  res.json({ message: `Welcome, ${req.user.userId}!` });
 });
 
-
-// Notification routes
-app.use('/api/notifications', NotificationRoutes);
-
-
-// // Protect the profile route (example for a protected route)
-// app.get('/profile', authMiddleware, (req, res) => {
-//     res.json({ message: `Welcome, ${req.user.userId}!` });
-// });
-
-
-// Protect the admin dashboard route (example for an admin route)
 app.get('/admin/dashboard', authMiddleware, requireAdmin, (req, res) => {
-
-
-    res.json({ message: 'Welcome to the admin dashboard' });
+  res.json({ message: 'Welcome to the admin dashboard' });
 });
 
-
-// PayPal configuration endpoint
-app.get('/api/config/paypal', (req, res) => res.send({
-    clientId: process.env.PAYPAL_CLIENT_ID
-}));
-
+// PayPal Configuration
+app.get('/api/config/paypal', (req, res) =>
+  res.send({
+    clientId: process.env.PAYPAL_CLIENT_ID,
+  })
+);
 
 // Start the server
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+const PORT = process.env.PORT || 8000;
+server.listen(PORT, () => {
+  console.log(`Server is running on http://localhost:${PORT}`);
 });
-
-

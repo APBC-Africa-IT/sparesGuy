@@ -59,9 +59,9 @@ export const getProductById = async (req, res) => {
 // Get related products
 export const getRelatedProducts = async (req, res) => {
   try {
-    const { category } = req.params
-    console.log("Ismael tried running this")
-    console.log(category)
+    const { category } = req.params;
+    console.log("Ismael tried running this");
+    console.log(category);
 
     // Validate category query parameter
     if (!category) {
@@ -107,14 +107,35 @@ export const deleteProduct = async (req, res) => {
   }
 };
 
+// Purchase a product
+export const purchaseProduct = async (req, res) => {
+  const { productId } = req.params;
+  const { quantityPurchased } = req.body;
+
+  try {
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.status(404).json({ error: 'Product not found' });
+    }
+
+    // Use the purchase method from the Product model
+    await product.purchase(quantityPurchased);
+
+    res.status(200).json({ message: 'Purchase successful', product });
+  } catch (error) {
+    res.status(500).json({ error: 'Server error', details: error.message });
+  }
+};
+
 // Export all functions
 export default {
   createProduct,
   getAllProducts,
   getProductById,
-  getRelatedProducts, 
+  getRelatedProducts,
   updateProduct,
   deleteProduct,
   upload,
   uploadImage,
+  purchaseProduct,
 };
