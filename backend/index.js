@@ -58,6 +58,8 @@ connectDB()
 // Serve React frontend
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const frontendPath = process.env.FRONTEND_PATH || path.join(__dirname, '../Frontend/dist');
+
+
 app.use(express.static(frontendPath));
 
 // Fallback for React SPA (for GET requests only)

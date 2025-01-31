@@ -3,21 +3,37 @@ import Product from '../Models/productModel.js';
 import multer from 'multer';
 import path from 'path';
 
-// Configure storage
+// Configure storage for Multer
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, './uploads'); // Set destination folder for uploads
   },
   filename: (req, file, cb) => {
     cb(null, Date.now() + path.extname(file.originalname)); // Set file name as current timestamp + file extension
-  }
+  },
 });
 
-// Set up Multer middleware for single file upload
-export const upload = multer({ storage: storage }).single('image');
+// Multer middleware with file validation
+export const upload = multer({
+  storage: storage,
+  fileFilter: (req, file, cb) => {
+    const extname = fileTypes.test(path.extname(file.originalname).toLowerCase());
+    const mimetype = fileTypes.test(file.mimetype);
+
+    if (extname && mimetype) {
+      return cb(null, true);
+    } else {
+      cb(new Error('Only JPEG, JPG, SVG ad PNG files are allowed.'));
+    }
+  },
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10 MB
+}).single('image');
 
 // Controller function for uploading images
 export const uploadImage = (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ error: 'No file uploaded or invalid file format.' });
+  }
   res.status(200).json({ imageUrl: `/uploads/${req.file.filename}` });
 };
 
@@ -56,28 +72,24 @@ export const getProductById = async (req, res) => {
   }
 };
 
-// Get related products
+// Get related products by category
 export const getRelatedProducts = async (req, res) => {
+  const { category } = req.params;
+
+  if (!category) {
+    return res.status(400).json({ error: 'Category query parameter is required.' });
+  }
+
   try {
-    const { category } = req.params;
-    console.log("Ismael tried running this");
-    console.log(category);
+    const relatedProducts = await Product.find({ category }).limit(8);
 
-    // Validate category query parameter
-    if (!category) {
-      return res.status(400).json({ error: 'Category query parameter is required' });
-    }
-
-    // Find related products based on category
-    const relatedProducts = await Product.find({ category }).limit(8); // Limit to 8 related products
-    if (relatedProducts.length === 0) {
+    if (!relatedProducts.length) {
       return res.status(200).json({ message: 'No related products found', products: [] });
     }
 
     res.status(200).json(relatedProducts);
   } catch (error) {
-    console.error('Error fetching related products:', error.message);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ error: 'Internal server error', details: error.message });
   }
 };
 
@@ -103,7 +115,7 @@ export const deleteProduct = async (req, res) => {
     }
     res.status(200).json({ message: 'Product deleted successfully' });
   } catch (error) {
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ error: 'Internal Server Error', details: error.message });
   }
 };
 
@@ -118,8 +130,14 @@ export const purchaseProduct = async (req, res) => {
       return res.status(404).json({ error: 'Product not found' });
     }
 
-    // Use the purchase method from the Product model
-    await product.purchase(quantityPurchased);
+    // Check stock availability
+    if (product.inStock < quantityPurchased) {
+      return res.status(400).json({ error: 'Not enough stock available.' });
+    }
+
+    // Update stock quantity
+    product.inStock -= quantityPurchased;
+    await product.save();
 
     res.status(200).json({ message: 'Purchase successful', product });
   } catch (error) {
