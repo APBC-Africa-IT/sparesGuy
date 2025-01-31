@@ -46,6 +46,7 @@ const AdminReviews = () => {
   };
 
   // View review
+  
   const handleView = (review) => {
     setSelectedReview(review);
     setShowModal(true);
@@ -100,6 +101,7 @@ const AdminReviews = () => {
       </Table>
 
       {/* Modal to view review details */}
+
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>Review Details</Modal.Title>

@@ -234,6 +234,7 @@ const Settings = () => {
         </Tab>
 
         {/* Notifications */}
+        
         <Tab eventKey="notifications" title="Notifications">
           <Card>
             <Card.Body>
