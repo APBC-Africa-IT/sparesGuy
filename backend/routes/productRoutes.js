@@ -1,5 +1,8 @@
 import express from 'express';
-import productController from '../Controllers/productController.js';
+import {createProduct,getAllProducts,getProductById,getRelatedProducts,updateProduct,deleteProduct,upload, uploadImage, purchaseProduct,} from '../Controllers/productController.js';
+  
+// Ensure this is imported correctly
+ // Import all functions individually
 import authMiddleware from '../Middleware/AuthMiddleware.js';
 import requireAdmin from '../Middleware/roleMiddleware.js';
 import mongoose from 'mongoose'; // Import mongoose for ObjectId validation
@@ -15,26 +18,27 @@ const validateObjectId = (req, res, next) => {
 };
 
 // Create a new product
-router.post('/', authMiddleware, productController.createProduct);
+router.post('/', authMiddleware, createProduct);
 
 // Get all products
-router.get('/', productController.getAllProducts);
+router.get('/', getAllProducts);
 
 // Get a single product by ID with ObjectId validation
-router.get('/:id', validateObjectId, productController.getProductById);
+router.get('/:id', validateObjectId, getProductById);
 
 // Get related products by category
+router.get('/relatedproducts', getRelatedProducts);
 
-
-router.get('/relatedproducts', productController.getRelatedProducts); 
+// Add the new route for purchasing a product
+router.post('/:id/purchase', purchaseProduct); // Ensure this is a valid callback function
 
 // Update a product by ID with ObjectId validation
-router.put('/:id', authMiddleware, requireAdmin, validateObjectId, productController.updateProduct);
+router.put('/:id', authMiddleware, requireAdmin, validateObjectId, updateProduct);
 
 // Delete a product by ID with ObjectId validation
-router.delete('/:id', authMiddleware, requireAdmin, validateObjectId, productController.deleteProduct);
+router.delete('/:id', authMiddleware, requireAdmin, validateObjectId, deleteProduct);
 
 // Route to upload image
-router.post('/upload', productController.upload, productController.uploadImage);
+router.post('/upload', upload, uploadImage);
 
 export default router;
