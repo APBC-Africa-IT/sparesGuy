@@ -5,8 +5,15 @@ import LoginFrame from '../Homepage/HomepageImages/gears.jpg';
 import { useRegisterUserMutation } from '../slices/usersApiSlice';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+
 import {signInWithGoogle, auth, onAuthStateChanged} from "../firebase"
+
+import {signInWithGoogle, auth} from "../firebase"
+
+ import { onAuthStateChanged } from 'firebase/auth';
+
 // import { onAuthStateChanged } from 'firebase/auth';
+
 
 const RegistrationPage = () => {
   const [, setUser] = useState(null)
